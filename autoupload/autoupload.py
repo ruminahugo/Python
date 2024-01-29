@@ -12,19 +12,18 @@ import autoit
 cookies = [
     {
         "domain": "aulac-vegan.com",
-        "expirationDate": 1735721333.513594,
         "hostOnly": True,
         "httpOnly": True,
         "name": "wordpress_sec_80f5e50d2546414852676eaa0a1724a6",
         "path": "/wp-admin",
         "secure": True,
-        "session": False,
+        "session": True,
         "storeId": None,
-        "value": "hoang%7C1702094716%7C4WX2sq7xNJDueG7Zy9TUO5F2a9YHp7EBLeuh0fS0pYb%7C2ef06b26e0317e814ad473cf7ee9a5fe6b87f8ae4278da99b8cdda34b70cff6f"
+        "value": "hoang%7C1702715212%7COWowR5KDwA8OCDQyig8b3E12kGUV6jetwAwHUNYuXm8%7Caedefa7d95231933c3be062f05c3b97ee33fb69d37e5a8206121302fb217594f"
     },
     {
         "domain": "aulac-vegan.com",
-        "expirationDate": 1735721444.842825,
+        "expirationDate": 1734078622,
         "hostOnly": True,
         "httpOnly": False,
         "name": "wp-settings-3",
@@ -36,27 +35,49 @@ cookies = [
     },
     {
         "domain": "aulac-vegan.com",
-        "expirationDate": 1735720632.403052,
+        "hostOnly": True,
+        "httpOnly": False,
+        "name": "wordpress_test_cookie",
+        "path": "/",
+        "secure": True,
+        "session": True,
+        "storeId": None,
+        "value": "WP%20Cookie%20check"
+    },
+    {
+        "domain": "aulac-vegan.com",
         "hostOnly": True,
         "httpOnly": True,
         "name": "wordpress_logged_in_80f5e50d2546414852676eaa0a1724a6",
         "path": "/",
         "secure": True,
-        "session": False,
+        "session": True,
         "storeId": None,
-        "value": "hoang%7C1702094716%7C4WX2sq7xNJDueG7Zy9TUO5F2a9YHp7EBLeuh0fS0pYb%7C93bbe0e61f14badeec03b83f5b20b2a45472a9c2d267617a9f787bafc227ec83"
+        "value": "hoang%7C1702715212%7COWowR5KDwA8OCDQyig8b3E12kGUV6jetwAwHUNYuXm8%7C276dfc226408ccfa8dc48819ddb9dd179d92a205795c029f0a157220f6c91340"
     },
     {
         "domain": "aulac-vegan.com",
+        "expirationDate": 1734083158.237495,
         "hostOnly": True,
         "httpOnly": False,
         "name": "pll_language",
         "path": "/",
         "secure": True,
-        "session": True,
+        "session": False,
         "storeId": None,
-        "value": "vi",
-        "expirationDate": 1701165167.753
+        "value": "vi"
+    },
+    {
+        "domain": "aulac-vegan.com",
+        "expirationDate": 1734078622,
+        "hostOnly": True,
+        "httpOnly": False,
+        "name": "wp-settings-time-3",
+        "path": "/",
+        "secure": True,
+        "session": False,
+        "storeId": None,
+        "value": "1702542486"
     }
 ]
 
@@ -126,8 +147,14 @@ def add_product(driver, filename, dirname, dirpath):
 try:
     driver.get("https://aulac-vegan.com/admin")
 
-    for cookie in cookies:
-        driver.add_cookie(cookie)
+    #for cookie in cookies:
+     #   driver.add_cookie(cookie)
+    user = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "user_login")))
+    user.send_keys('hoang')
+    pswd = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "user_pass")))
+    pswd.send_keys('Huyhoang2017')
+    submit = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "wp-submit")))
+    submit.click()
 
     driver.refresh()
 

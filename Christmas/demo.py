@@ -4,7 +4,7 @@ import os
 from colorama import Fore, Back, Style, init
 
 init(autoreset=True)
-max = 20
+max = 50
 
 def randoms(final):
     random_numbers = []
@@ -16,29 +16,32 @@ def randoms(final):
         random_numbers.append(random_number)
     return random_numbers
 
-def random_color(content):
+def random_color():
     color = [Fore.RED, Fore.BLUE, Fore.WHITE, Fore.YELLOW, Fore.LIGHTYELLOW_EX]
     selected_color = random.choice(color)
-    return selected_color + random_charac(content)
+    return selected_color + random_charac()
 
-def random_charac(content):
-    character = ['0', '#', '+']
+def random_charac():
+    character = ['O', '#', '+']
     character = random.choice(character)
     return character
 
 def create_christmas():
-    os.system('cls')
     for i in range(max):
-        if i % 2 != 0 :
+        if i % 2 != 0:
+            character = ''
             random_numbers = randoms(i)
-            print(' '* ((max-i)//2), end='')
+            print(' ' * ((max-i)//2), end='')
             for j in range(i):
-                print(random_color('0'), end='') if(j in random_numbers) else print(Fore.GREEN + '*', end='')
-            print('\n')
+                character += (random_color() if j in random_numbers else Fore.GREEN + '*')
+            print(character)
     print(Fore.LIGHTBLACK_EX + 'mWm'.center(max))
     print(Fore.LIGHTBLACK_EX + 'mWm'.center(max))
     print(Fore.LIGHTBLACK_EX + 'mWm'.center(max))
 
 while True:
     create_christmas()
+    #christmas_tree = create_christmas()
+    #print(christmas_tree, end='', flush=True)
     time.sleep(0.6)
+    os.system('cls')
