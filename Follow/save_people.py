@@ -1,6 +1,7 @@
 import cv2
 import face_recognition
 import xml.etree.ElementTree as ET
+import numpy as np
 
 # Đọc dữ liệu từ file objects_data.xml (nếu có)
 try:
@@ -16,10 +17,6 @@ for obj in root.findall('object'):
     obj_data = {
         'id': int(obj.get('id')),
         'type': obj.get('type'),
-        'x': int(obj.get('x')),
-        'y': int(obj.get('y')),
-        'w': int(obj.get('w')),
-        'h': int(obj.get('h')),
         'encoding': obj.findtext('encoding', default='')  # Sử dụng findtext để tránh lỗi khi không tìm thấy 'encoding'
     }
     objects_data.append(obj_data)
@@ -27,7 +24,8 @@ for obj in root.findall('object'):
         known_encodings.append(bytes.fromhex(obj_data['encoding']))
 
 # Khởi tạo video capture từ nguồn RTSP
-video_capture = cv2.VideoCapture('rtsp://admin:123456@172.16.3.229:554/stream')
+video_capture = cv2.VideoCapture('rtsp://admin:123456@172.16.3.152:554/stream')
+
 
 while True:
     ret, frame = video_capture.read()
@@ -40,29 +38,40 @@ while True:
     face_locations = face_recognition.face_locations(rgb_frame)
     face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
-    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-        matched_id = None
-        # So sánh mã hoá khuôn mặt mới với danh sách mã hoá đã biết trước
-        matches = face_recognition.compare_faces(known_encodings, face_encoding)
-        #if True in matches:
-        #    matched_id = objects_data[matches.index(True)]['id']
+    # Create a list to track whether each face is already known
+    face_known = [False] * len(face_locations)
 
-        # Hiển thị ID của khuôn mặt khớp (nếu có)
-        if matched_id is None:
+    for i, face_encoding in enumerate(face_encodings):
+        matched_id = None
+
+        # Convert known_encodings to strings for comparison
+        known_encodings_strings = [encoding for encoding in known_encodings]
+
+        # Check if the current face_encoding matches any known encoding
+        matches = [bytes(face_encoding).hex() == encoding for encoding in known_encodings_strings]
+
+        # If there is no match, save the new face
+        if True not in matches:
+            face_known[i] = True  # Mark the current face as known
             # Thêm thông tin về người mới vào file XML
-            new_face_encoding = face_encoding.hex()
+            new_face_encoding = bytes(face_encoding).hex()
             new_object = ET.Element('object')
             new_object.set('id', str(len(objects_data) + 1))
             new_object.set('type', 'face')  # Thay đổi loại đối tượng tùy thuộc vào nhu cầu
-            new_object.set('x', str(left))  # Tọa độ x của đối tượng mới
-            new_object.set('y', str(top))   # Tọa độ y của đối tượng mới
-            new_object.set('w', str(right - left))  # Chiều rộng của đối tượng mới
-            new_object.set('h', str(bottom - top))  # Chiều cao của đối tượng mới
             new_object_encoding = ET.SubElement(new_object, 'encoding')
             new_object_encoding.text = new_face_encoding
             root.append(new_object)
             tree.write('objects_data.xml')
             print("Đã lưu thông tin người mới!")
+
+    # Hiển thị ID của các đối tượng từ file XML
+    for obj, is_known in zip(objects_data, face_known):
+        if is_known:
+            continue  # Skip known faces to avoid duplication in display
+        # Cập nhật tọa độ dựa trên vị trí thực tế của đối tượng trong frame hiện tại
+        obj_x, obj_y, obj_w, obj_h = obj['x'], obj['y'], obj['w'], obj['h']
+        cv2.rectangle(frame, (obj_x, obj_y), (obj_x + obj_w, obj_y + obj_h), (0, 255, 0), 2)
+        cv2.putText(frame, f"ID: {obj['id']}", (obj_x, obj_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     # Hiển thị video với ID của các đối tượng di chuyển
     cv2.imshow('Object ID Tracking via RTSP', frame)

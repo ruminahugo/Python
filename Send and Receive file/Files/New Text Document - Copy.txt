@@ -1,0 +1,1 @@
+nuitka --onefile --windows-icon-from-ico=icon.ico --output-dir=AuLac --windows-disable-console --enable-plugin=tk-inter imgtotext.py
